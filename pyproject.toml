@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "LAN Game of battleships, made with pygame."
 readme = "README.md"
 authors = [
-    { name = "Szymon P", email = "szymon_jozef@proton.me" }
+    { name = "Szymon P", email = "szymon_jozef@proton.me" },
+    { name = "Jakub K", email = "173594616+Real-Morbius@users.noreply.github.com"}
 ]
 requires-python = ">=3.13"
 dependencies = [
