@@ -1,6 +1,13 @@
 import pytest
 
-from battleship_pygame_lan.logic import Board, FieldState, Ship, ShipType, ShotResult
+from battleship_pygame_lan.logic import (
+    Board,
+    FieldState,
+    Radar,
+    Ship,
+    ShipType,
+    ShotResult,
+)
 
 
 def test_ship_initialization():
@@ -25,6 +32,14 @@ def test_board_initialization():
 
     with pytest.raises(ValueError, match="out of bounds"):
         board.shoot(-1, 5)
+
+
+def test_radar_initialization():
+    radar = Radar()
+    radar.mark_shot_result(2, 2, FieldState.Hit)
+    lines = str(radar).strip().split("\n")
+    assert "x" in lines[3]
+    assert radar.get_field_state(2, 2) == FieldState.Hit
 
 
 def test_board_str_rows():
