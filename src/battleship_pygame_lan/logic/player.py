@@ -9,17 +9,9 @@ logger = logging.getLogger(__name__)
 class Player:
     def __init__(self, name: str) -> None:
         self.name = name
-        self.board: Board = Board()
-        self.radar: Radar = Radar()
-        self.available_ships: dict[ShipType, int] = {
-            ShipType.FourMaster: 1,
-            ShipType.ThreeMaster: 2,
-            ShipType.TwoMaster: 3,
-            ShipType.OneMaster: 4,
-        }
+        self.reset()
 
     def reset(self) -> None:
-        # probably could be done more efficiently in the future
         self.board: Board = Board()
         self.radar: Radar = Radar()
         self.available_ships: dict[ShipType, int] = {
@@ -77,5 +69,5 @@ class Player:
         )  # if there is more than 0 ships it will return false
 
     def is_dead(self) -> bool:
-        """Returns: True if player doesn't has any ships left on the battlefield"""
+        """Returns: True if player doesn't have any ships left on the battlefield"""
         return self.board.is_game_over()
