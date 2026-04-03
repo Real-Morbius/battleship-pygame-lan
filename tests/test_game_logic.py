@@ -1,6 +1,14 @@
+import logging
+
 import pytest
 
-from src.battleship_pygame_lan.game_logic import Board, FieldState, Ship, ShipType
+from battleship_pygame_lan.logic import Board, FieldState, Ship, ShipType
+
+logger = logging.getLogger(__name__)
+
+logging.basicConfig(filename="tests/tests.log", level=logging.DEBUG)
+
+logger.info("Started unit testing...")
 
 
 def test_ship_initialization():
