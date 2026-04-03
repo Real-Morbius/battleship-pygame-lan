@@ -107,7 +107,6 @@ def test_placing_ship_collision():
 def test_game_over():
     board = Board()
     board.place_ship(ShipType.OneMaster, 1, 1)
-    placed_ship = board.get_field_ship(1, 1)
     assert not board.is_game_over()
     board.shoot(1, 1)
     assert board.is_game_over()
