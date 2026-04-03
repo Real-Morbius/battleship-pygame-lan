@@ -3,6 +3,7 @@ import pytest
 from battleship_pygame_lan.logic import (
     Board,
     FieldState,
+    Player,
     Radar,
     Ship,
     ShipType,
@@ -40,6 +41,13 @@ def test_radar_initialization():
     lines = str(radar).strip().split("\n")
     assert "x" in lines[3]
     assert radar.get_field_state(2, 2) == FieldState.Hit
+
+
+def test_player_initialization():
+    name = "spider-mid"
+    player = Player(name)
+    assert player.name == name
+    assert isinstance(player.board, Board)
 
 
 def test_board_str_rows():
