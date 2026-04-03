@@ -18,6 +18,7 @@ class Board:
         self._board: list[list[_Field]] = [
             [_Field() for _ in range(self.y)] for _ in range(self.x)
         ]
+        self._ships: list[Ship] = []
 
     def __str__(self) -> str:
         header = "   " + " ".join(str(i) for i in range(self.y))
@@ -106,6 +107,7 @@ class Board:
             self._board[current_x][current_y].state = FieldState.Taken
             self._board[current_x][current_y].ship = new_ship
 
+        self._ships.append(new_ship)
         logger.info(
             f"Ship {ship_type.name} was succesfully placed at ({start_x}, {start_y})"
         )
@@ -152,3 +154,13 @@ class Board:
         logger.info(f"Player tried shooting at ({x}, {y}), but missed!")
         pos.state = FieldState.Missed
         return False
+
+    def is_game_over(self) -> bool:
+        """
+        Returns:
+            bool: True if all ships are sinked. False otherwise
+        """
+        if not self._ships:
+            return False
+
+        return all(ship.is_sunk() for ship in self._ships)

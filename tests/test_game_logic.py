@@ -104,6 +104,15 @@ def test_placing_ship_collision():
         board.place_ship(ShipType.OneMaster, 1, 2)
 
 
+def test_game_over():
+    board = Board()
+    board.place_ship(ShipType.OneMaster, 1, 1)
+    placed_ship = board.get_field_ship(1, 1)
+    assert not board.is_game_over()
+    board.shoot(1, 1)
+    assert board.is_game_over()
+
+
 def test_game():
     board = Board()
 
@@ -116,8 +125,12 @@ def test_game():
     assert placed_ship.health == 1
     assert not placed_ship.is_sunk()
 
+    assert not board.is_game_over()
+
     result_2 = board.shoot(2, 1)
     assert result_2 is True
     assert board.get_field_state(2, 1) == FieldState.Hit
     assert placed_ship.health == 0
     assert placed_ship.is_sunk() is True
+
+    assert board.is_game_over()
