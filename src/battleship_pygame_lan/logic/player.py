@@ -58,8 +58,8 @@ class Player:
 
         if self.available_ships[ship_type] <= 0:
             logger.info(
-                f"Player tried placing ship of type {ship_type.name}, but he doesn't "
-                "have any left"
+                f"Player {self.name} tried placing ship of type {ship_type.name}, but "
+                "he doesn't have any left"
             )
             raise ValueError("Player doesn't have enough ships of chosen type")
         self.board.place_ship(ship_type, row, column, horizontal)
@@ -68,9 +68,13 @@ class Player:
 
     def take_shot(self, row: int, column: int, shot_result: ShotResult) -> None:
         """Mark your shot on the radar"""
+        logger.info(
+            f"Player {self.name} marked ({row}, {column}) as {ShotResult} on his radar"
+        )
         self.radar.mark_shot_result(row, column, shot_result)
 
     def receive_shot(self, row: int, column: int) -> ShotResult:
+        logger.info(f"Player {self.name} received a shot at ({row}, {column})")
         return self.board.shoot(row, column)
 
     def is_every_ship_placed(self) -> bool:
