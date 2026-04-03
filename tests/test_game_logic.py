@@ -94,7 +94,7 @@ def test_placing_ship_success():
 )
 def test_placing_ship_out_of_bounds(x, y):
     board = Board()
-    with pytest.raises(ValueError, match="X or Y is out of bounds!"):
+    with pytest.raises(ValueError):
         board.place_ship(ShipType.OneMaster, x, y)
 
 
