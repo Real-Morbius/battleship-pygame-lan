@@ -7,6 +7,17 @@ logger = logging.getLogger(__name__)
 
 
 class Player:
+    """
+    Player class is the main entry point into the games logic.
+    It provides methods to interact with the whole game.
+
+    Attributes:
+        name (str): Name of the player
+        board (Board):  Players own board
+        radar (Radar): Players enemy board
+        available_ships (dict[ShipType, int]): Inventory of ships remaining to be placed
+    """
+
     def __init__(self, name: str) -> None:
         self.name = name
         self.reset()
