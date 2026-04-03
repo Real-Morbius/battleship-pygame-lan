@@ -35,6 +35,21 @@ def test_board_initialization():
         board.shot(-1, 5)
 
 
+def test_board_str_rows():
+    board = Board(3, 3)
+    board.place_ship(ShipType.TwoMaster, 0, 0, horizontal=True)  # (0,0) and (1,0)
+
+    lines = str(board).strip().split("\n")
+
+    #  "   0 1 2"
+    #  " 0 s _ _"
+    #  " 1 s _ _"
+
+    assert "s" in lines[1]
+    assert "s" in lines[2]
+    assert "s" not in lines[3]
+
+
 def test_shot_miss():
     board = Board()
     result = board.shot(0, 0)

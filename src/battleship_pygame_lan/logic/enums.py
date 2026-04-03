@@ -15,6 +15,12 @@ class ShipType(Enum):
 class FieldState(Enum):
     """
     Represents the current state of a single field on the board.
+
+    Values:
+        Empty
+        Taken
+        Missed
+        Hit
     """
 
     # numbers can be later changed to colors

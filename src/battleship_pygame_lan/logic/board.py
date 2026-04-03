@@ -19,6 +19,23 @@ class Board:
             [_Field() for _ in range(self.x)] for _ in range(self.y)
         ]
 
+    def __str__(self) -> str:
+        header = "   " + " ".join(str(i) for i in range(self.y))
+        rows = [header]
+
+        mapping = {
+            FieldState.Empty: "_",
+            FieldState.Taken: "s",
+            FieldState.Missed: "o",
+            FieldState.Hit: "x",
+        }
+
+        for i in range(self.x):
+            row_chars = [mapping[self._board[i][j].state] for j in range(self.y)]
+            rows.append(f"{i:2} {' '.join(row_chars)}")
+
+        return "\n".join(rows)
+
     def get_field_state(self, x: int, y: int) -> FieldState:
         """
         Returns:
