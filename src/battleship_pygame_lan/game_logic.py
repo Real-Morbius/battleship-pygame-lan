@@ -56,7 +56,7 @@ class Board:
         ]
 
     def place_ship(
-        self, ship_type: ShipType, start_x: int, start_y: int, horizontal: bool
+        self, ship_type: ShipType, start_x: int, start_y: int, horizontal: bool = True
     ):
         """
         Place a ship at specified place.
