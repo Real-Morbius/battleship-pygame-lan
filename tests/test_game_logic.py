@@ -1,8 +1,11 @@
 import pytest
 
 from battleship_pygame_lan.logic import (
+    AlreadyShotError,
     Board,
     FieldState,
+    NearbyTakenError,
+    OutOfBoundsError,
     Player,
     Radar,
     Ship,
@@ -28,10 +31,10 @@ def test_ship_hit_sink():
 def test_board_initialization():
     board = Board(10, 10)
 
-    with pytest.raises(ValueError, match="out of bounds"):
+    with pytest.raises(OutOfBoundsError):
         board.shoot(10, 10)
 
-    with pytest.raises(ValueError, match="out of bounds"):
+    with pytest.raises(OutOfBoundsError):
         board.shoot(-1, 5)
 
 
@@ -117,21 +120,28 @@ def test_placing_ship_success():
 )
 def test_placing_ship_out_of_bounds(x, y):
     board = Board()
-    with pytest.raises(ValueError):
+    with pytest.raises(OutOfBoundsError):
         board.place_ship(ShipType.OneMaster, x, y)
+
+
+def test_shooting_two_times():
+    player = Player("morbius")
+
+    with pytest.raises(AlreadyShotError):
+        player.take_shot(1, 1, ShotResult.AlreadyShot)
 
 
 def test_placing_ship_collision():
     board = Board()
     board.place_ship(ShipType.OneMaster, 1, 1)
 
-    with pytest.raises(ValueError, match="Field nearby is taken"):
+    with pytest.raises(NearbyTakenError):
         board.place_ship(ShipType.OneMaster, 1, 1)
 
-    with pytest.raises(ValueError, match="Field nearby is taken"):
+    with pytest.raises(NearbyTakenError):
         board.place_ship(ShipType.OneMaster, 2, 1)
 
-    with pytest.raises(ValueError, match="Field nearby is taken"):
+    with pytest.raises(NearbyTakenError):
         board.place_ship(ShipType.OneMaster, 1, 2)
 
 

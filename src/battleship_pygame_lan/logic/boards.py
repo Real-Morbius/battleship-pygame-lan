@@ -1,6 +1,7 @@
 import logging
 
 from .enums import FieldState, ShipType, ShotResult
+from .errors import AlreadyShotError, NearbyTakenError, OutOfBoundsError
 from .models import Ship, _Field
 
 logger = logging.getLogger(__name__)
@@ -74,8 +75,8 @@ class Board(BaseGrid):
             horizontal (bool, optional): True for horizontal placement,
             False for vertical
         Raises:
-            ValueError: If the ship is placed out of the board's boundaries.
-            ValueError: If the ship touches or overlaps another already placed ship.
+            OutOfBoundsError: If the ship is placed out of the board's boundaries.
+            NearbyTakenError: If the ship touches or overlaps another already placed ship.
 
         Returns:
             bool: True if the ship was successfully placed.
@@ -97,7 +98,7 @@ class Board(BaseGrid):
                 f"[start: ({start_row}, {start_column}), end: "
                 f"({end_row}, {end_column})]"
             )
-            raise ValueError("Row or column is out of bounds!")
+            raise OutOfBoundsError(start_row, start_column)
 
         min_row = max(min(start_row, end_row) - 1, 0)
         max_row = min(self.row - 1, max(start_row, end_row) + 1)
@@ -114,7 +115,7 @@ class Board(BaseGrid):
                         f"but he cannot do that, because field ({i}, {j}) is already "
                         "taken"
                     )
-                    raise ValueError("Field nearby is taken")
+                    raise NearbyTakenError(start_row, start_column)
 
         new_ship = Ship(ship_type)
 
@@ -133,11 +134,17 @@ class Board(BaseGrid):
         return True
 
     def shoot(self, row: int, column: int) -> ShotResult:
+        """
+        Shoot specified row and column.
+
+        Returns:
+            ShotResult
+        """
         if row >= self.row or row < 0 or column >= self.column or column < 0:
             logger.info(
                 f"Player tried shooting at ({row}, {column}), but it was out of bounds"
             )
-            raise ValueError("Row or column is out of bounds!")
+            raise OutOfBoundsError(row, column)
 
         pos = self._grid[row][column]
 
@@ -178,12 +185,18 @@ class Radar(BaseGrid):
     def mark_shot_result(self, row: int, column: int, state: ShotResult) -> None:
         """
         Updates the radar with the result of a shot made by the player.
+
+        Input to this method should be output of the enemy receive_shot.
+
+        Raises:
+            OutOfBoundsError
+            AlreadyShotError
         """
         if row >= self.row or row < 0 or column >= self.column or column < 0:
-            raise ValueError("Row or column is out of bounds!")
+            raise OutOfBoundsError(row, column)
 
         if state == ShotResult.AlreadyShot:
-            raise ValueError("This position is already marked shot")
+            raise AlreadyShotError()
 
         translation = {
             ShotResult.Miss: FieldState.Missed,
