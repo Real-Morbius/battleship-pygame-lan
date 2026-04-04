@@ -41,12 +41,12 @@ def main() -> None:
 
                 elif action == "host":
                     game_state = "GAME"
-                    logger.info(f"Start serwera jako {player1.name}")
+                    logger.info(f"Server started as {player1.name}")
 
                 elif action == "join_final":
                     game_state = "GAME"
                     target_ip = menu.host_ip
-                    logger.info(f"Łączenie z {target_ip} jako {player1.name}")
+                    logger.info(f"Connecting with {target_ip} as {player1.name}")
 
                 elif action == "quit":
                     running = False
@@ -59,7 +59,7 @@ def main() -> None:
             menu.draw()
         elif game_state == "GAME":
             screen.fill((10, 10, 25))
-            renderer.draw(player1.board, 50, 80, f"FLOTA: {player1.name}")
+            renderer.draw(player1.board, 50, 80, f"FLEET: {player1.name}")
             renderer.draw(player1.radar, 550, 80, f"RADAR (HOST: {menu.host_ip})")
 
         pygame.display.flip()
