@@ -89,7 +89,7 @@ class MainMenu:
             return pygame.transform.scale(
                 img, (self.screen_rect.width, self.screen_rect.height)
             )
-        except:
+        except Exception:
             surf = pygame.Surface(self.screen_rect.size)
             surf.fill((30, 30, 30))
             return surf
