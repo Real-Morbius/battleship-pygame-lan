@@ -90,7 +90,6 @@
             packages = [
               virtualenv
               pkgs.uv
-              pkgs.ruff
             ]
             ++ runtimeLibs;
             env = {

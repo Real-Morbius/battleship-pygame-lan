@@ -10,6 +10,7 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "pygame>=2.6.1",
+    "ruff>=0.15.9",
 ]
 
 [project.scripts]
@@ -28,3 +29,11 @@ indent-style = "space"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
