@@ -140,10 +140,22 @@ class MainMenu:
 
     def handle_events(self, event: pygame.event.Event) -> str | None:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            # Aktywacja pola tekstowego myszką (dla SETTINGS lub JOIN_INPUT)
+            if self.menu_state in ["SETTINGS", "JOIN_INPUT"]:
+                kliknieto_w_pole = self.input_field_rect.collidepoint(event.pos)
+
+                # JEDNORAZOWE AUTOMATYCZNE CZYSZCZENIE CAŁEJ ZAWARTOŚCI PO KLIKNIĘCIU
+                if kliknieto_w_pole and not self.input_active:
+                    if self.menu_state == "SETTINGS":
+                        self.player_name = ""
+                    elif self.menu_state == "JOIN_INPUT":
+                        self.host_ip = ""
+
+                self.input_active = kliknieto_w_pole
+
             if self.menu_state == "SETTINGS":
                 if self.slider_rect.collidepoint(event.pos):
                     self._update_volume(event.pos[0])
-                self.input_active = self.input_field_rect.collidepoint(event.pos)
 
             btns: list[dict[str, Any]] = []
             if self.menu_state == "MAIN":
@@ -177,18 +189,36 @@ class MainMenu:
                         self.menu_state = "SETTINGS"
                     elif action == "show_join_input":
                         self.menu_state = "JOIN_INPUT"
+                        self.input_active = (
+                            False  # Resetuj zaznaczenie pola przy wejściu
+                        )
                     elif action == "back":
                         self.menu_state = "MAIN"
                         return "settings_updated"
                     return action
 
+        # OBSŁUGA WPISYWANIA Z KLAWIATURY
         if event.type == pygame.KEYDOWN and self.input_active:
             if event.key == pygame.K_BACKSPACE:
-                self.player_name = self.player_name[:-1]
+                # Usuwanie znaku w zależności od aktywnego menu
+                if self.menu_state == "SETTINGS":
+                    self.player_name = self.player_name[:-1]
+                elif self.menu_state == "JOIN_INPUT":
+                    self.host_ip = self.host_ip[:-1]
+
             elif event.key == pygame.K_RETURN:
                 self.input_active = False
-            elif len(self.player_name) < 15:
-                self.player_name += event.unicode
+                if self.menu_state == "JOIN_INPUT":
+                    return "join_final"  # Enter automatycznie zatwierdza połączenie
+
+            else:
+                # Wpisywanie znaków
+                if self.menu_state == "SETTINGS" and len(self.player_name) < 15:
+                    self.player_name += event.unicode
+                elif self.menu_state == "JOIN_INPUT":
+                    # Blokada znaków: dla IP pozwalamy tylko na cyfry, kropki i ograniczamy długość do 15 znaków
+                    if event.unicode in "0123456789." and len(self.host_ip) < 15:
+                        self.host_ip += event.unicode
 
         if (
             event.type == pygame.MOUSEMOTION
