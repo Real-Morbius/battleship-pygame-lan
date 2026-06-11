@@ -1,94 +1,108 @@
+from typing import Protocol, runtime_checkable
+
 import pygame
+
+from ..logic.enums import FieldState
+
+WHITE = (255, 255, 255)
+SHIP_COLOR = (100, 100, 100)
+MISS_COLOR = (150, 150, 255)
+HIT_COLOR = (255, 50, 50)
+
+CELL_SIZE = 40
+CELL_MARGIN = 2
+GRID_STEP = CELL_SIZE + CELL_MARGIN
+LABEL_OFFSET_X = 25
+LABEL_OFFSET_Y = 10
+COLUMN_LABEL_Y = 20
+TITLE_OFFSET_Y = 40
+
+
+@runtime_checkable
+class BoardLike(Protocol):
+    """
+    Protocol defining the required interface for board-like objects.
+
+    Any object used by the BoardRenderer must implement these attributes
+    and methods to ensure compatibility between the logic and GUI layers.
+    """
+
+    row: int
+    column: int
+
+    def get_field_state(self, row: int, col: int) -> FieldState:
+        """Return the FieldState at the given coordinates."""
 
 
 class BoardRenderer:
-    def __init__(self, screen):
+    def __init__(self, screen: pygame.Surface) -> None:
         self.screen = screen
-        self.font = pygame.font.SysFont("Arial", 14)
-        self.label_font = pygame.font.SysFont("Arial", 16, bold=True)
-        self.cell_size = 35
-        self.grid_size = 10
-        self.grid_step = self.cell_size + 1
+        self.font = pygame.font.SysFont("Arial", 18)
+        self.colors = {
+            FieldState.Empty: (30, 60, 100),
+            FieldState.Taken: SHIP_COLOR,
+            FieldState.Missed: (40, 80, 140),
+            FieldState.Hit: (60, 20, 20),
+        }
 
-    def draw(self, board_object, ox, oy, title):
-        if board_object is None:
-            return
+    def draw(self, board: BoardLike, ox: int, oy: int, title: str) -> None:
+        title_surf = pygame.font.SysFont("Arial", 24, bold=True).render(
+            title, True, WHITE
+        )
+        self.screen.blit(title_surf, (ox, oy - TITLE_OFFSET_Y))
 
-        # Rysowanie tytułu planszy nad nią
-        title_surf = self.label_font.render(title, True, (210, 220, 255))
-        self.screen.blit(title_surf, (ox + 25, oy - 20))
+        for r in range(board.row):
+            label_y = oy + (r * GRID_STEP) + LABEL_OFFSET_Y
+            self.screen.blit(
+                self.font.render(str(r), True, WHITE), (ox - LABEL_OFFSET_X, label_y)
+            )
+            for c in range(board.column):
+                if r == 0:
+                    self.screen.blit(
+                        self.font.render(str(c), True, WHITE),
+                        (ox + (c * GRID_STEP) + 15, oy - COLUMN_LABEL_Y),
+                    )
 
-        # Rysowanie nagłówków kolumn (A-J)
-        for col in range(self.grid_size):
-            label = self.font.render(chr(ord("A") + col), True, (140, 140, 140))
-            self.screen.blit(label, (ox + 25 + col * self.grid_step + 12, oy + 2))
-
-        # Pobranie wewnętrznej reprezentacji macierzy 10x10 z Twojego oryginalnego silnika
-        cells_grid = board_object
-        if hasattr(board_object, "get_grid_state"):
-            try:
-                cells_grid = board_object.get_grid_state()
-            except:
-                pass
-        elif hasattr(board_object, "grid"):
-            cells_grid = board_object.grid
-
-        # Rysowanie właściwych wierszy i kafelków siatki
-        for row in range(self.grid_size):
-            # Numery wierszy (1-10)
-            row_label = self.font.render(str(row + 1), True, (140, 140, 140))
-            self.screen.blit(row_label, (ox + 4, oy + 25 + row * self.grid_step + 8))
-
-            for col in range(self.grid_size):
                 rect = pygame.Rect(
-                    ox + 25 + col * self.grid_step,
-                    oy + 25 + row * self.grid_step,
-                    self.cell_size,
-                    self.cell_size,
+                    ox + (c * GRID_STEP), oy + (r * GRID_STEP), CELL_SIZE, CELL_SIZE
                 )
+                state = board.get_field_state(r, c)
+                base_color = self.colors.get(state, (30, 30, 60))
 
-                # Renderowanie domyślnego koloru tła oceanu
-                pygame.draw.rect(self.screen, (16, 28, 54), rect)
+                pygame.draw.rect(self.screen, base_color, rect)
 
-                # Bezpieczne wyciąganie wartości pola bez wywoływania błędów indeksu
-                cell_val = None
-                if cells_grid:
-                    try:
-                        cell_val = cells_grid[row][col]
-                    except:
-                        pass
+                if state == FieldState.Missed:
+                    pygame.draw.circle(self.screen, MISS_COLOR, rect.center, 12, 2)
+                    pygame.draw.circle(self.screen, MISS_COLOR, rect.center, 6, 1)
+                elif state == FieldState.Hit:
+                    pygame.draw.line(
+                        self.screen,
+                        HIT_COLOR,
+                        (rect.left + 5, rect.top + 5),
+                        (rect.right - 5, rect.bottom - 5),
+                        3,
+                    )
+                    pygame.draw.line(
+                        self.screen,
+                        HIT_COLOR,
+                        (rect.right - 5, rect.top + 5),
+                        (rect.left + 5, rect.bottom - 5),
+                        3,
+                    )
+                elif state == FieldState.Empty:
+                    highlight = tuple(min(255, v + 30) for v in base_color)
+                    pygame.draw.line(
+                        self.screen,
+                        highlight,
+                        (rect.left + 2, rect.top + 2),
+                        (rect.right - 2, rect.top + 2),
+                        2,
+                    )
 
-                val_str = str(cell_val).upper() if cell_val is not None else ""
+                pygame.draw.rect(self.screen, (20, 40, 70), rect, 1)
 
-                # Mapowanie kolorów i stanów pól dokładnie z Twojego oryginalnego projektu
-                if "SHIP" in val_str or val_str == "1":
-                    pygame.draw.rect(
-                        self.screen, (70, 80, 120), rect
-                    )  # Czysty segment statku
-                elif "HIT" in val_str:
-                    pygame.draw.rect(self.screen, (70, 80, 120), rect)
-                    pygame.draw.circle(
-                        self.screen, (230, 40, 40), rect.center, 6
-                    )  # Trafiony
-                elif "MISS" in val_str or "WATER" in val_str:
-                    pygame.draw.circle(
-                        self.screen, (100, 110, 140), rect.center, 4
-                    )  # Pudło
-                elif "SUNK" in val_str:
-                    pygame.draw.rect(self.screen, (30, 30, 40), rect)  # Zatopiony
-
-                # Rysowanie krawędzi siatki
-                pygame.draw.rect(self.screen, (32, 48, 82), rect, 1)
-
-    def get_clicked_cell(self, mouse_pos, ox, oy):
-        """Mapuje współrzędne myszy na indeksy tablicy (wiersz, kolumna)."""
-        mx, my = mouse_pos
-        board_total_size = self.grid_size * self.grid_step
-
-        click_area = pygame.Rect(ox + 25, oy + 25, board_total_size, board_total_size)
-        if click_area.collidepoint(mx, my):
-            col = (mx - (ox + 25)) // self.grid_step
-            row = (my - (oy + 25)) // self.grid_step
-            if 0 <= col < self.grid_size and 0 <= row < self.grid_size:
-                return (row, col)
-        return None
+    def get_clicked_cell(
+        self, pos: tuple[int, int], ox: int, oy: int
+    ) -> tuple[int, int] | None:
+        col, row = (pos[0] - ox) // GRID_STEP, (pos[1] - oy) // GRID_STEP
+        return (int(row), int(col)) if 0 <= row < 10 and 0 <= col < 10 else None
