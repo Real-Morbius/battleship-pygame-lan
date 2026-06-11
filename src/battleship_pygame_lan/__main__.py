@@ -149,20 +149,35 @@ def main() -> None:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     pos = pygame.mouse.get_pos()
 
-                    # FAZA A: LOBBY (Czekamy na drugiego gracza)
-                    if getattr(gm, "game_state", None) == GameState.LOBBY:
-                        gm.ready(ReadyType.LOBBY)
-                        logger.info(
-                            "Zgłoszono gotowość w lobby. Czekam na przeciwnika..."
-                        )
-
-                    # FAZA B: SHIP_PLACEMENT (Rozstawianie floty)
-                    elif getattr(gm, "game_state", None) == GameState.SHIP_PLACEMENT:
-                        cell = renderer.get_clicked_cell(pos, 50, 80)
+                    # --- SYSTEM LOGOWANIA KLIKNIĘĆ ---
+                    def loguj_klikniecie(x_pos, y_pos, nazwa_planszy):
+                        cell = renderer.get_clicked_cell(pos, x_pos, y_pos)
                         if cell:
                             row, col = cell
+                            print(
+                                f"[INPUT] Kliknięto {nazwa_planszy}: Rząd {row}, Kolumna {col}"
+                            )
+                        return cell
+
+                    # Sprawdzanie dla obu plansz (Twoja plansza na 50, Radar na 550)
+                    klik_moja = renderer.get_clicked_cell(pos, 50, 80)
+                    klik_radar = renderer.get_clicked_cell(pos, 550, 80)
+
+                    if klik_moja:
+                        loguj_klikniecie(50, 80, "TWOJA PLANSZA")
+                    elif klik_radar:
+                        loguj_klikniecie(550, 80, "RADAR")
+
+                    # --- LOGIKA GRY ---
+                    # FAZA A: LOBBY
+                    if getattr(gm, "game_state", None) == GameState.LOBBY:
+                        gm.ready(ReadyType.LOBBY)
+
+                    # FAZA B: SHIP_PLACEMENT
+                    elif getattr(gm, "game_state", None) == GameState.SHIP_PLACEMENT:
+                        if klik_moja:
+                            row, col = klik_moja
                             try:
-                                # Próba postawienia statku 3-masztowego poziomo
                                 sukces = gm.place_ship(
                                     ShipType.ThreeMaster,
                                     row=row,
@@ -175,19 +190,14 @@ def main() -> None:
                                     )
                             except Exception as e:
                                 logger.warning(f"Błąd rozstawiania statku: {e}")
-
-                            # Wysłanie powiadomienia o gotowości floty do serwera
                             gm.ready(ReadyType.SHIP_PLACED)
 
-                    # FAZA C: WAR (Faza bitwy i wymiany ognia)
+                    # FAZA C: WAR
                     elif getattr(gm, "game_state", None) == GameState.WAR:
-                        # Możemy oddać strzał tylko w trakcie własnej tury
-                        if getattr(gm, "is_my_turn", False):
-                            cell = renderer.get_clicked_cell(pos, 550, 80)
-                            if cell:
-                                row, col = cell
-                                gm.shoot(row, col)
-                                logger.info(f"Wysłano strzał na pole: {row}, {col}")
+                        if getattr(gm, "is_my_turn", False) and klik_radar:
+                            row, col = klik_radar
+                            gm.shoot(row, col)
+                            logger.info(f"Wysłano strzał na pole: {row}, {col}")
 
         # --- 3. OBSŁUGA ASYNCHRONICZNYCH EVENTÓW INTERFEJSU (KOLEJKA GUI) ---
         if game_state == "GAME" and gm is not None:
