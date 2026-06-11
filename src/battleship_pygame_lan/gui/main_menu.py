@@ -153,9 +153,11 @@ class MainMenu:
 
                 self.input_active = kliknieto_w_pole
 
-            if self.menu_state == "SETTINGS":
-                if self.slider_rect.collidepoint(event.pos):
-                    self._update_volume(event.pos[0])
+            # TUTAJ BYŁO PODKREŚLENIE - teraz połączone za pomocą 'and'
+            if self.menu_state == "SETTINGS" and self.slider_rect.collidepoint(
+                event.pos
+            ):
+                self._update_volume(event.pos[0])
 
             btns: list[dict[str, Any]] = []
             if self.menu_state == "MAIN":
@@ -209,16 +211,17 @@ class MainMenu:
             elif event.key == pygame.K_RETURN:
                 self.input_active = False
                 if self.menu_state == "JOIN_INPUT":
-                    return "join_final"  # Enter automatycznie zatwierdza połączenie
+                    return "join_final"
 
             else:
-                # Wpisywanie znaków
                 if self.menu_state == "SETTINGS" and len(self.player_name) < 15:
                     self.player_name += event.unicode
-                elif self.menu_state == "JOIN_INPUT":
-                    # Blokada znaków: dla IP pozwalamy tylko na cyfry, kropki i ograniczamy długość do 15 znaków
-                    if event.unicode in "0123456789." and len(self.host_ip) < 15:
-                        self.host_ip += event.unicode
+                elif (
+                    self.menu_state == "JOIN_INPUT"
+                    and event.unicode in "0123456789."
+                    and len(self.host_ip) < 15
+                ):
+                    self.host_ip += event.unicode
 
         if (
             event.type == pygame.MOUSEMOTION
