@@ -2,6 +2,7 @@ import logging
 import socket
 import sys
 import threading
+import time
 from queue import Empty
 
 import pygame
@@ -109,9 +110,13 @@ def main() -> None:
                     server_thread = threading.Thread(target=server.start, daemon=True)
                     server_thread.start()
 
-                    print(f"[GM] Inicjalizacja hosta pod IP: {current_host_ip}")
+                    time.sleep(0.5)
+
+                    print(
+                        f"[GM] Inicjalizacja hosta pod IP: 127.0.0.1 (Zewnętrznie: {current_host_ip})"
+                    )
                     gm = GameManager(
-                        player_name=menu.player_name, server_ip=current_host_ip
+                        player_name=menu.player_name, server_ip="127.0.0.1"
                     )
                     gm.connect()
 
