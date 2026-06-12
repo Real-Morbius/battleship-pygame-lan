@@ -117,6 +117,17 @@ def test_server_shot_result_route(mock_server: NetworkServer) -> None:
 
     mock_conn_spider.sendall.assert_any_call(expected_bytes)
 
+    msg_2: str = build_shot_result_payload(
+        row=3, column=3, result=ShotResult.Miss, sender="morbius", receiver="spider-mid"
+    )
+    payload_data_2: dict = json.loads(msg_2)
+
+    mock_server._handle_shot_result(payload_data_2, msg_2)
+
+    expected_bytes = msg_2.encode("utf-8")
+
+    mock_conn_spider.sendall.assert_any_call(expected_bytes)
+
     assert mock_server.current_turn is player_morbius
 
 
