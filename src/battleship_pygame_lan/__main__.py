@@ -7,7 +7,7 @@ from pathlib import Path
 from queue import Empty
 
 import pygame
-from appdirs import user_log_dir
+from appdirs import user_log_dir  # type: ignore
 
 from battleship_pygame_lan.game_manager import GameManager
 from battleship_pygame_lan.game_manager.enums import GuiEvent
@@ -228,7 +228,8 @@ def main() -> None:
 
             elif game_state == "END_SCREEN":
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    # Sprawdzenie kliknięcia przycisku powrotu narysowanego przez draw_end_screen
+                    # Sprawdzenie kliknięcia przycisku powrotu narysowanego
+                    # przez draw_end_screen
                     btn_rect = draw_end_screen(
                         screen,
                         end_title_font,

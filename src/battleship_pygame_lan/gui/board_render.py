@@ -70,7 +70,8 @@ class BoardRenderer:
             h_row, h_col = hover_cell
             ship_length, horizontal = hover_ship_info
 
-            # 1. Wyznaczamy kafelki, które fizycznie zajmie statek (pionowo w górę / poziomo w prawo)
+            # 1. Wyznaczamy kafelki, które fizycznie zajmie statek
+            # (pionowo w górę / poziomo w prawo)
             out_of_bounds = False
             intended_cells = []
             for i in range(ship_length):
@@ -83,7 +84,8 @@ class BoardRenderer:
                 else:
                     out_of_bounds = True
 
-            # 2. Samodzielna walidacja kolizji (z uwzględnieniem nowo postawionego statku)
+            # 2. Samodzielna walidacja kolizji
+            # (z uwzględnieniem nowo postawionego statku)
             has_collision = False
             if out_of_bounds:
                 has_collision = True
@@ -92,22 +94,28 @@ class BoardRenderer:
                     if has_collision:
                         break
 
-                    # NOWOŚĆ: Sprawdzamy, czy sam kafelek podglądu nie jest już zajęty przez świeżo postawiony statek
+                    # NOWOŚĆ: Sprawdzamy, czy sam kafelek podglądu nie jest już
+                    # zajęty przez świeżo postawiony statek
                     if board.get_field_state(r, c) == FieldState.Taken:
                         has_collision = True
                         break
 
-                    # Sprawdzamy otoczenie kafelka (boki i skosy: -1 do +1) pod kątem sąsiednich statków
+                    # Sprawdzamy otoczenie kafelka
+                    # (boki i skosy: -1 do +1) pod kątem sąsiednich statków
                     for dr in range(-1, 2):
                         for dc in range(-1, 2):
                             nr, nc = r + dr, c + dc
-                            if 0 <= nr < board.row and 0 <= nc < board.column:
-                                if board.get_field_state(nr, nc) == FieldState.Taken:
-                                    # Czerwony kolor odpali się tylko wtedy, gdy wykryty statek obok
-                                    # NIE JEST częścią aktualnie rysowanego podglądu
-                                    if (nr, nc) not in intended_cells:
-                                        has_collision = True
-                                        break
+                            if (
+                                0 <= nr < board.row
+                                and 0 <= nc < board.column
+                                and board.get_field_state(nr, nc) == FieldState.Taken
+                                # Czerwony kolor odpali się tylko wtedy, gdy
+                                # wykryty statek obok
+                                # NIE JEST częścią aktualnie rysowanego podglądu
+                                and (nr, nc) not in intended_cells
+                            ):
+                                has_collision = True
+                                break
 
             if has_collision:
                 preview_color = HOVER_ILLEGAL

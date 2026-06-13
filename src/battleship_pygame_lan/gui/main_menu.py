@@ -133,7 +133,8 @@ class MainMenu:
             self.miss_sound.play()
 
     def play_gui_event_sound(self, event_type: GuiEvent) -> None:
-        """Odtwarza dźwięk na podstawie zdarzenia wrzuconego do kolejki przez GameManager."""
+        """Odtwarza dźwięk na podstawie zdarzenia
+        wrzuconego do kolejki przez GameManager."""
         if event_type in [GuiEvent.ShotHit, GuiEvent.ShotMarked] and self.hit_sound:
             self.hit_sound.play()
         elif event_type == GuiEvent.ShotMissed and self.miss_sound:
@@ -256,9 +257,13 @@ class MainMenu:
                 if self.menu_state == "SETTINGS" and len(self.player_name) < 15:
                     if event.unicode.isprintable():
                         self.player_name += event.unicode
-                elif self.menu_state == "JOIN_INPUT" and len(self.host_ip) < 15:
-                    if event.unicode.isdigit() or event.unicode == ".":
-                        self.host_ip += event.unicode
+                elif (
+                    self.menu_state == "JOIN_INPUT"
+                    and len(self.host_ip) < 15
+                    and event.unicode.isdigit()
+                    or event.unicode == "."
+                ):
+                    self.host_ip += event.unicode
             return "settings_updated"
 
         if (
