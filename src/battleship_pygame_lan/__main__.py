@@ -4,8 +4,10 @@ import sys
 import threading
 import time
 from queue import Empty
+from pathlib import Path
 
 import pygame
+from appdirs import user_log_dir
 
 from battleship_pygame_lan.game_manager import GameManager
 from battleship_pygame_lan.game_manager.enums import GuiEvent
@@ -46,8 +48,15 @@ def get_next_needed_ship(gm: GameManager) -> ShipType | None:
 
 def main() -> None:
     logger = logging.getLogger(__name__)
+    log_dir: Path = Path(user_log_dir("battleship-pygame-lan"))
+    log_fname: Path = Path("battleships.log")
+    log_path: Path = log_dir.joinpath(log_fname)
+
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path.touch()
+
     logging.basicConfig(
-        filename="battleships.log",
+        filename=str(log_path),
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
     )
