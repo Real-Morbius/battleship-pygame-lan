@@ -1,15 +1,91 @@
 ![Tests Status](https://github.com/szymon-jozef/battleship-pygame-lan/actions/workflows/python-tests.yml/badge.svg)
-# LAN game of battleships made with pygame
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 
-# Project state
-Currently work in progress.
+# LAN game of battleships made with pygame
+Classic game of battleships made with python.
+
+Most of the code is well documented with docstrings.
+
+## Screenshots
+![Main menu](.github/screenshots/menu.png)
+![Settings](.github/screenshots/settings.png)
+![Empty board](.github/screenshots/empty_board.png)
+![Game](.github/screenshots/game.png)
+
+# Important!
+Players __need to__ have different names! Otherwise server won't allow them to play.
+
+# How to play?
+1. Go into settings and set your name.
+2. One player needs to host the game. All he needs to do is click `Play` and `Host Game`.
+3. The other player has to click `Play` and `Join Game`. He needs to type in the IP address that the first player has on his screen.
+4. If you want to play it over internet you need to [forward port 6769 on your router](https://en.wikipedia.org/wiki/Port_forwarding).
+5. Enjoy!
+
+# Tech stack
+This project utilises technologies like:
+- python
+- pygame
+- uv
+- nix
+
+# Structure
+This project is split into multiple modules:
+
+## Network
+All the logic behind networking. It has classes like: `NetworkServer` and `NetworkClient`.
+It exposes a TCP socket at port `6769` and connects with it. It sends custom payload using functions in `payloads.py`.
+All the information is sent in JSON format.
+
+## Logic
+Logic layer of the project. It handles player boards. It has custom Enums like `ShipType`, `FieldState`, `ShotResult`.
+It also uses custom exceptions.
+
+## GUI
+GUI logic behind everything that is shown. It uses pygame to display everything.
+
+## Game Manager
+High abstraction class that bundles logic and networking together. It also has gui_events_queue that hints GUI at actions it should take.
+
+## IO
+Saves config to the disk.
+
+# Installation instructions
+## Windows
+TODO!
+
+## Nixos
+- Add this repo to your inputs in `flake.nix`:
+```nix
+inputs = {
+    battleship.url = "github:szymon-jozef/battleship-pygame-lan";
+}
+```
+- Add packages and enable it. 
+Enabling it exposes port 6769 and adds a .desktop entry.
+```nix
+imports = [
+    inputs.battleship.nixosModules.default
+];
+
+programs.battleship-pygame-lan.enable = true;
+```
+
+## Other linux distro
+**Not supported, but should work**
+Use pipx to install:
+```bash
+pipx install git+https://github.com/szymon-jozef/battleship-pygame-lan
+```
+Type in `battleship-pygame-lan` to start.
 
 # Milestones:
 - [x] Game logic
-- [ ] GUI with pygame
-- [ ] Network connection
-- [ ] Something else I probably forgot
+- [x] GUI with pygame
+- [x] Network connection
 
-## Authors:
-- [Szymon P](https://github.com/szymon-jozef)
-- [Jakub K](https://github.com/Real-Morbius)
+# Authors:
+|Name|Responsible for|
+|---|---|
+|[Szymon P](https://github.com/szymon-jozef)| Game logic, networking, IO|
+|[Jakub K](https://github.com/Real-Morbius)| GUI|
