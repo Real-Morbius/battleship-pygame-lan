@@ -138,10 +138,12 @@
                 nativeBuildInputs = [ pkgs.makeWrapper ];
               }
               ''
-                mkdir -p $out/bin
+                mkdir -p $out/bin $out/share/battleship-pygame-lan
+                cp -R ${./assets} $out/share/battleship-pygame-lan/assets
                 makeWrapper ${venv}/bin/battleship-pygame-lan $out/bin/battleship-pygame-lan \
                   --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath runtimeLibs}" \
-                  --set SDL_VIDEODRIVER "wayland,x11"
+                  --set SDL_VIDEODRIVER "wayland,x11" \
+                  --set BATTLESHIP_ASSETS_DIR "$out/share/battleship-pygame-lan/assets"
               '';
 
           desktopItem = pkgs.makeDesktopItem {
