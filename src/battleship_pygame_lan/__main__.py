@@ -70,6 +70,7 @@ def draw_end_screen(
         f"Liczba trafień: {stats['hits']}",
         f"Liczba pudeł: {stats['misses']}",
         f"Celność: {accuracy:.1f}%",
+        f"Liczba zatopionych statków: {stats['sunk']}/10",
         f"Najdłuższa seria trafień: {stats['max_streak']}",
     ]
 
@@ -148,6 +149,7 @@ def main() -> None:
         "shots": 0,
         "hits": 0,
         "misses": 0,
+        "sunk": 0,
         "current_streak": 0,
         "max_streak": 0,
     }
@@ -336,6 +338,17 @@ def main() -> None:
                         player_stats["current_streak"] += 1
                         if player_stats["current_streak"] > player_stats["max_streak"]:
                             player_stats["max_streak"] = player_stats["current_streak"]
+
+                    elif gui_event == GuiEvent.ShotSunk:
+                        print("[GUI EVENT] Statek zatopiony!")
+                        if hit_sound:
+                            hit_sound.play()
+
+                        # Możesz tutaj również zaktualizować statystyki, jeśli to konieczne
+                        player_stats["shots"] += 1
+                        player_stats["hits"] += 1
+                        player_stats["sunk"] += 1
+                        player_stats["current_streak"] += 1
 
                     elif gui_event == GuiEvent.ShotMissed:
                         print("[GUI EVENT] Pudło!")
