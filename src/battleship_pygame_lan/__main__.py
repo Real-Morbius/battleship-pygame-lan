@@ -3,8 +3,8 @@ import socket
 import sys
 import threading
 import time
-from queue import Empty
 from pathlib import Path
+from queue import Empty
 
 import pygame
 from appdirs import user_log_dir
@@ -27,14 +27,14 @@ def get_local_ip() -> str:
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
         s.close()
-        return ip
+        return str(ip)
     except Exception:
         return "127.0.0.1"
 
 
 def get_next_needed_ship(gm: GameManager) -> ShipType | None:
     """Zwraca kolejny typ statku, który gracz musi jeszcze rozstawić."""
-    order = [
+    order: list[ShipType] = [
         ShipType.FourMaster,
         ShipType.ThreeMaster,
         ShipType.TwoMaster,
@@ -91,7 +91,7 @@ def main() -> None:
     current_host_ip = ""
 
     ready_sent = False
-    valid_ready_type = ReadyType.SHIP_PLACED.value
+    valid_ready_type = ReadyType.SHIP_PLACED
 
     game_state = "MENU"
     running = True
@@ -122,7 +122,8 @@ def main() -> None:
                     time.sleep(0.5)
 
                     print(
-                        f"[GM] Inicjalizacja hosta pod IP: 127.0.0.1 (Zewnętrznie: {current_host_ip})"
+                        "[GM] Inicjalizacja hosta pod IP: 127.0.0.1 "
+                        f"(Zewnętrznie: {current_host_ip})"
                     )
                     gm = GameManager(
                         player_name=menu.player_name, server_ip="127.0.0.1"
@@ -160,7 +161,8 @@ def main() -> None:
                     elif event.key in (pygame.K_r, pygame.K_SPACE):
                         ship_horizontal = not ship_horizontal
                         print(
-                            f"[GRA] Orientacja statku: {'POZIOMA' if ship_horizontal else 'PIONOWA'}"
+                            f"[GRA] Orientacja statku: "
+                            f"{'POZIOMA' if ship_horizontal else 'PIONOWA'}"
                         )
 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -171,7 +173,7 @@ def main() -> None:
                         cell = renderer.get_clicked_cell(pos, 50, 80)
                         if cell:
                             row, col = cell
-                            next_ship = get_next_needed_ship(gm)
+                            next_ship: ShipType | None = get_next_needed_ship(gm)
                             if next_ship:
                                 try:
                                     success = gm.player.place_ship(
@@ -179,7 +181,8 @@ def main() -> None:
                                     )
                                     if success:
                                         print(
-                                            f"[GRA] Postawiono {next_ship.name} na pozycji {row, col}"
+                                            "[GRA] Postawiono"
+                                            f"{next_ship.name} na pozycji {row, col}"
                                         )
                                 except Exception as e:
                                     print(f"[GRA] Nie można postawić statku: {e}")
@@ -196,8 +199,6 @@ def main() -> None:
                         if cell:
                             row, col = cell
                             try:
-                                # Zapewniamy idealne dopasowanie wielkości liter imienia gracza z siecią,
-                                # aby GameManager pomyślnie przetworzył pakiet trafienia/pudła.
                                 gm.player.name = gm.network_client.player_name
 
                                 # Przywrócone wywołanie z poprzedniego kroku
@@ -215,7 +216,8 @@ def main() -> None:
                 and not ready_sent
             ):
                 print(
-                    f"[GRA] Flota gotowa. Wysyłanie pakietu SHIP_PLACED dla: {gm.player.name}"
+                    "[GRA] Flota gotowa. "
+                    f"Wysyłanie pakietu SHIP_PLACED dla: {gm.player.name}"
                 )
                 ready_payload = build_ready_payload(
                     gm.player.name, valid_ready_type, True
@@ -271,7 +273,6 @@ def main() -> None:
                 if hover_cell:
                     next_ship = get_next_needed_ship(gm)
                     if next_ship:
-                        # Pobieramy długość statku bezpośrednio z wartości enuma ShipType (.value to int, np. 4, 3, 2, 1)
                         hover_ship_info = (next_ship.value, ship_horizontal)
 
             # Lewy ekran: Nasza flota
@@ -303,15 +304,22 @@ def main() -> None:
                     next_ship = get_next_needed_ship(gm)
                     if next_ship:
                         orient = "POZIOMO" if ship_horizontal else "PIONOWO"
-                        turn_text = f"FAZA ROZSTAWIANIA: Ustaw {next_ship.name} ({orient}) [R/SPACJA - obrót]"
+                        turn_text = (
+                            f"FAZA ROZSTAWIANIA: Ustaw {next_ship.name} "
+                            f"({orient}) [R/SPACJA - obrót]"
+                        )
                         turn_color = (100, 200, 255)
                     else:
                         turn_text = "ZATWIERDZANIE ROZSTAWIENIA..."
                         turn_color = (255, 255, 255)
 
-                # Sytuacja 2: Ty skończyłeś, ale serwer wciąż utrzymuje SHIP_PLACEMENT (przeciwnik rozstawia)
+                # Sytuacja 2: Ty skończyłeś, ale serwer wciąż utrzymuje
+                # SHIP_PLACEMENT (przeciwnik rozstawia)
                 elif ready_sent and gm.game_state == GameState.SHIP_PLACEMENT:
-                    turn_text = "WSZYSTKIE STATKI POSTAWIONE! Oczekiwanie na zakończenie rozstawiania przez przeciwnika..."
+                    turn_text = (
+                        "WSZYSTKIE STATKI POSTAWIONE! Oczekiwanie na "
+                        "zakończenie rozstawiania przez przeciwnika..."
+                    )
                     turn_color = (255, 165, 0)
 
                 # Sytuacja 3: Bitwa!
