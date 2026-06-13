@@ -7,7 +7,8 @@ from ..logic.enums import FieldState
 WHITE = (255, 255, 255)
 SHIP_COLOR = (100, 100, 100)
 MISS_COLOR = (150, 150, 255)
-HIT_COLOR = (255, 50, 50)
+HIT_COLOR = (187, 103, 38)
+SUNK_COLOR = (255, 50, 50)
 
 # Kolory podglądu statku
 HOVER_LEGAL = (0, 220, 0)  # Zielony dla poprawnej pozycji
@@ -47,6 +48,7 @@ class BoardRenderer:
             FieldState.Taken: SHIP_COLOR,
             FieldState.Missed: (40, 80, 140),
             FieldState.Hit: (60, 20, 20),
+            FieldState.Sunk: (80, 20, 20),
         }
 
     def draw(
@@ -146,33 +148,51 @@ class BoardRenderer:
 
                 pygame.draw.rect(self.screen, base_color, rect)
 
-                if state == FieldState.Missed:
-                    pygame.draw.circle(self.screen, MISS_COLOR, rect.center, 12, 2)
-                    pygame.draw.circle(self.screen, MISS_COLOR, rect.center, 6, 1)
-                elif state == FieldState.Hit:
-                    pygame.draw.line(
-                        self.screen,
-                        HIT_COLOR,
-                        (rect.left + 5, rect.top + 5),
-                        (rect.right - 5, rect.bottom - 5),
-                        3,
-                    )
-                    pygame.draw.line(
-                        self.screen,
-                        HIT_COLOR,
-                        (rect.right - 5, rect.top + 5),
-                        (rect.left + 5, rect.bottom - 5),
-                        3,
-                    )
-                elif state == FieldState.Empty and (r, c) not in preview_cells:
-                    highlight = tuple(min(255, v + 30) for v in base_color)
-                    pygame.draw.line(
-                        self.screen,
-                        highlight,
-                        (rect.left + 2, rect.top + 2),
-                        (rect.right - 2, rect.top + 2),
-                        2,
-                    )
+                match state:
+                    case FieldState.Missed:
+                        pygame.draw.circle(self.screen, MISS_COLOR, rect.center, 12, 2)
+                        pygame.draw.circle(self.screen, MISS_COLOR, rect.center, 6, 1)
+                    case FieldState.Hit:
+                        pygame.draw.line(
+                            self.screen,
+                            HIT_COLOR,
+                            (rect.left + 5, rect.top + 5),
+                            (rect.right - 5, rect.bottom - 5),
+                            3,
+                        )
+                        pygame.draw.line(
+                            self.screen,
+                            HIT_COLOR,
+                            (rect.right - 5, rect.top + 5),
+                            (rect.left + 5, rect.bottom - 5),
+                            3,
+                        )
+
+                    case FieldState.Empty:
+                        if (r, c) not in preview_cells:
+                            highlight = tuple(min(255, v + 30) for v in base_color)
+                            pygame.draw.line(
+                                self.screen,
+                                highlight,
+                                (rect.left + 2, rect.top + 2),
+                                (rect.right - 2, rect.top + 2),
+                                2,
+                            )
+                    case FieldState.Sunk:
+                        pygame.draw.line(
+                            self.screen,
+                            SUNK_COLOR,
+                            (rect.left + 5, rect.top + 5),
+                            (rect.right - 5, rect.bottom - 5),
+                            3,
+                        )
+                        pygame.draw.line(
+                            self.screen,
+                            SUNK_COLOR,
+                            (rect.right - 5, rect.top + 5),
+                            (rect.left + 5, rect.bottom - 5),
+                            3,
+                        )
 
                 # Rysowanie krawędzi kafelka
                 if (r, c) in preview_cells:

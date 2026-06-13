@@ -161,6 +161,10 @@ class Board(BaseGrid):
                 pos.ship.hit()
                 if pos.ship.is_sunk:
                     logger.info(f"Ship {pos.ship.ship_type.name} was sunk!")
+                    for r in range(self.row):
+                        for c in range(self.column):
+                            if self._grid[r][c].ship == pos.ship:
+                                self._grid[r][c].state = FieldState.Sunk
                     return ShotResult.Sunk
             return ShotResult.Hit
 
@@ -203,7 +207,26 @@ class Radar(BaseGrid):
         translation = {
             ShotResult.Miss: FieldState.Missed,
             ShotResult.Hit: FieldState.Hit,
-            ShotResult.Sunk: FieldState.Hit,
+            ShotResult.Sunk: FieldState.Sunk,
         }
 
         self._grid[row][column].state = translation[state]
+
+        if state == ShotResult.Sunk:
+            to_visit = [(row, column)]
+            visited = set()
+
+            while to_visit:
+                r, c = to_visit.pop()
+                if (r, c) in visited:
+                    continue
+                visited.add((r, c))
+
+                self._grid[r][c].state = FieldState.Sunk
+
+                for dr, dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    nr, nc = r + dr, c + dc
+                    if 0 <= nr < self.row and 0 <= nc < self.column:
+                        if self._grid[nr][nc].state in [FieldState.Hit, FieldState.Sunk]:
+                            if (nr, nc) not in visited:
+                                to_visit.append((nr, nc))
