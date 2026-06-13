@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class NetworkServer(NetworkCore):
-    def __init__(self, server_ip: str = "0.0.0.0") -> None:
+    def __init__(self, server_ip: str = "127.0.0.1") -> None:
         super().__init__(ip_address=server_ip)
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.MAX_PLAYERS: int = 2
@@ -265,7 +265,7 @@ class NetworkServer(NetworkCore):
             and self.current_game_state == GameState.WAR
         ):
             self._route(msg, attacker)
-            if shot_result != ShotResult.AlreadyShot:
+            if shot_result == ShotResult.Miss:
                 self._switch_turn()
                 logger.info(f"[Server] {attacker} Changing turn...")
 
