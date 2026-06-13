@@ -169,7 +169,8 @@ def test_game() -> None:
 
     result_2 = board.shoot(1, 2)
     assert result_2 == ShotResult.Sunk
-    assert board.get_field_state(1, 2) == FieldState.Hit
+    assert board.get_field_state(1, 2) == FieldState.Sunk
+    assert board.get_field_state(1, 1) == FieldState.Sunk
     assert placed_ship.health == 0
     assert placed_ship.is_sunk is True
 

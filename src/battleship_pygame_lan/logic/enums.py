@@ -28,6 +28,7 @@ class FieldState(Enum):
     Taken = 2
     Missed = 3
     Hit = 4
+    Sunk = 5
 
 
 class ShotResult(Enum):
