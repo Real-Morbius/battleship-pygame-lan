@@ -24,7 +24,7 @@ Players __need to__ have different names! Otherwise server won't allow them to p
 
 
 # Installation instructions
-## General
+## Source
 1. Clone, download or get this repo any way possible
 2. Make sure you have [uv](https://docs.astral.sh/uv/#installation) installed.
 3. `uv sync`
@@ -56,7 +56,10 @@ programs.battleship-pygame-lan.enable = true;
 ```
 
 ## Windows
-Install and run .exe file from the release tab
+Download and run `Battleships-LAN-Windows.exe` from the release tab
+
+## Linux binary
+Download `Battleships-LAN-Linux` from the release tab, make it executable and run it. 
 
 # Tech stack
 This project utilises technologies like:
@@ -98,9 +101,10 @@ Saves config to the disk.
 - [x] Game logic
 - [x] GUI with pygame
 - [x] Network connection
+- [X] Distribution 
 
 # Authors:
 |Name|Responsible for|
 |---|---|
-|[Szymon P](https://github.com/szymon-jozef)| Game logic, networking, IO|
+|[Szymon P](https://github.com/szymon-jozef)| Game logic, networking, IO, distribution|
 |[Jakub K](https://github.com/Real-Morbius)| GUI|
