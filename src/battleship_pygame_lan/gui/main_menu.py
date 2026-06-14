@@ -1,3 +1,4 @@
+import importlib.resources as resource
 import os
 from typing import Any, cast
 
@@ -12,6 +13,23 @@ WHITE = (255, 255, 255)
 GRAY = (70, 70, 70)
 HOVER_COLOR = (0, 120, 215)
 BUTTON_BG = (20, 20, 30, 220)
+
+
+def get_assets_path() -> str:
+    env_dir = os.environ.get("BATTLESHIP_ASSETS_DIR")
+    if env_dir and os.path.isdir(env_dir):
+        return env_dir
+
+    try:
+        assets_dir = str(resource.files("battleship_pygame_lan") / "gui" / "assets")
+        if os.path.isdir(assets_dir):
+            return assets_dir
+
+    except Exception as e:
+        print(f"Error while getting assets: {e}")
+
+    # fallback
+    return os.path.join(os.getcwd(), "assets")
 
 
 class MainMenu:
@@ -77,11 +95,7 @@ class MainMenu:
         ]
 
     def load_assets(self) -> None:
-        assets_dir = os.environ.get("BATTLESHIP_ASSETS_DIR")
-        if not assets_dir:
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-            project_root = os.path.abspath(os.path.join(base_dir, "..", "..", ".."))
-            assets_dir = os.path.join(project_root, "assets")
+        assets_dir = get_assets_path()
 
         gfx_path = os.path.join(assets_dir, "gfx")
         sfx_path = os.path.join(assets_dir, "sfx")

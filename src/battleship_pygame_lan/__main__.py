@@ -1,5 +1,4 @@
 import logging
-import os
 import socket
 import sys
 import threading
@@ -13,7 +12,7 @@ from appdirs import user_log_dir  # type: ignore
 from battleship_pygame_lan.game_manager import GameManager
 from battleship_pygame_lan.game_manager.enums import GuiEvent
 from battleship_pygame_lan.gui.board_render import BoardRenderer
-from battleship_pygame_lan.gui.main_menu import MainMenu
+from battleship_pygame_lan.gui.main_menu import MainMenu, get_assets_path
 from battleship_pygame_lan.logic import ShipType
 from battleship_pygame_lan.network import GameState
 from battleship_pygame_lan.network.models import ReadyType
@@ -117,7 +116,8 @@ def main() -> None:
     pygame.display.set_caption("Battleship LAN")
     clock = pygame.time.Clock()
 
-    assets_path: Path = Path(os.getenv("BATTLESHIP_ASSETS_DIR") or "./assets")
+    assets_path: Path = Path(get_assets_path())
+
     hit_sound_path = assets_path.joinpath("sfx/hit.ogg")
     miss_sound_path = assets_path.joinpath("sfx/miss.ogg")
 
