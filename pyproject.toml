@@ -24,7 +24,7 @@ requires = ["uv_build>=0.11.2,<0.12.0"]
 build-backend = "uv_build"
 
 [tool.uv.extra-build-dependencies]
-pygame = ["setuptools"]
+pygame = ["setuptools._distutils.msvccompiler"]
 
 [tool.ruff]
 line-length = 88
