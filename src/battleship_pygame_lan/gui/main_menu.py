@@ -20,14 +20,15 @@ def get_assets_path() -> str:
     if env_dir and os.path.isdir(env_dir):
         return env_dir
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    assets_dir = os.path.join(base_dir, "assets")
-
     try:
         assets_dir = str(resource.files("battleship_pygame_lan") / "gui" / "assets")
-        return assets_dir
+        if os.path.isdir(assets_dir):
+            return assets_dir
+
     except Exception as e:
         print(f"Error while getting assets: {e}")
+
+    # fallback
     return os.path.join(os.getcwd(), "assets")
 
 
