@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import socket
 import sys
@@ -111,7 +112,14 @@ def main() -> None:
     logging.getLogger().addHandler(console_handler)
 
     pygame.init()
-    pygame.mixer.init()
+    if pygame.mixer:
+        with contextlib.suppress(pygame.error):
+            pygame.mixer.init()
+
+    if pygame.mixer and not pygame.mixer.get_init():
+        logger.warning("[Main] No sound device detected. No sound will be played!")
+        pygame.mixer = None
+
     screen = pygame.display.set_mode((1000, 600))
     pygame.display.set_caption("Battleship LAN")
     clock = pygame.time.Clock()
@@ -122,9 +130,14 @@ def main() -> None:
     miss_sound_path = assets_path.joinpath("sfx/miss.ogg")
     sink_sound_path = assets_path.joinpath("sfx/sink.ogg")
 
-    hit_sound = pygame.mixer.Sound(hit_sound_path)
-    miss_sound = pygame.mixer.Sound(miss_sound_path)
-    sink_sound = pygame.mixer.Sound(sink_sound_path)
+    hit_sound = None
+    miss_sound = None
+    sink_sound = None
+
+    if pygame.mixer:
+        hit_sound = pygame.mixer.Sound(hit_sound_path)
+        miss_sound = pygame.mixer.Sound(miss_sound_path)
+        sink_sound = pygame.mixer.Sound(sink_sound_path)
 
     info_font = pygame.font.SysFont("Arial", 22, bold=True)
     end_title_font = pygame.font.SysFont("Arial", 36, bold=True)
