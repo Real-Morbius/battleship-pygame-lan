@@ -137,7 +137,9 @@ class NetworkServer(NetworkCore):
 
         logger.info(f"[NEW CONNECTION] {addr} connected")
         current_player = NetworkPlayer(conn=conn, addr=addr)
-        self.players.append(current_player)
+        with self.players_lock:
+            self.players.append(current_player)
+
         if self.current_game_state is None:
             self.current_game_state = GameState.LOBBY
 
@@ -280,6 +282,14 @@ class NetworkServer(NetworkCore):
         with self.players_lock:
             if player in self.players:
                 self.players.remove(player)
+
+            if self.current_turn == player:
+                self.current_turn = None
+
+            if len(self.players) == 0:
+                self.current_game_state = None
+                logger.info("[Server] Server is empty. Changing game state to None")
+
         player.conn.close()
         if player.player_name and self.current_game_state in (
             GameState.SHIP_PLACEMENT,
