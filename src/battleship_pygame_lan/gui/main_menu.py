@@ -107,6 +107,11 @@ class MainMenu:
             os.path.join(gfx_path, "play_background.jpg")
         )
 
+        self.click_sound = None
+        self.play_sound = None
+        self.hit_sound = None
+        self.miss_sound = None
+
         if pygame.mixer:
             try:
                 c_f, p_f, h_f, m_f = [
