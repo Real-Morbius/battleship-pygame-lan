@@ -144,7 +144,6 @@ class GameManager:
         if self.player.is_dead:
             logger.info("[GameManager] Player is dead :(")
             self.network_client.end()
-            self.gui_events_queue.put(GuiEvent.GameLost)
 
     def _handle_game_end(self, message: dict) -> None:
         loser: str = str(message.get("loser"))
