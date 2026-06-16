@@ -32,7 +32,12 @@ class NetworkServer(NetworkCore):
             )  # no need to wait until OS decides to release the port
 
         self.MAX_PLAYERS: int = 2
+
         self.players_lock = threading.Lock()
+        # event that signalises that the server is empty and should close itself
+        # only does something when the game has ended
+        self.empty_event: threading.Event = threading.Event()
+
         self.players: list[NetworkPlayer] = []
         self.current_game_state: GameState | None = None
         self.current_turn: NetworkPlayer | None = None
@@ -48,6 +53,10 @@ class NetworkServer(NetworkCore):
 
         self.server.bind(self.ADDR)
         self.server.listen()
+
+        self.empty_event.clear()
+        threading.Thread(target=self._wait_and_stop, daemon=True).start()
+
         self.is_running = True
         try:
             while self.is_running:
@@ -62,10 +71,13 @@ class NetworkServer(NetworkCore):
         finally:
             logger.info("[Server] Server thread has finished working")
 
-    def stop(self) -> None:
+    def _stop(self) -> None:
         """
-        Method for stopping the server safely.
+        Private method for stopping the server safely.
         It disconnects all the players before shutting down.
+
+        Server calls this method by itself when the game is finished. Shouldn't be
+        called outside of this class.
         """
         self.is_running = False
         logger.info("[Server] Initiating shutdown...")
@@ -75,7 +87,9 @@ class NetworkServer(NetworkCore):
                     player.conn.close()
             self.players.clear()
         with suppress(Exception):
+            self.server.shutdown(socket.SHUT_RDWR)
             self.server.close()
+
         logger.info("[Server] Server shutdown complete")
 
     def _broadcast(self, msg: str, sender_conn: socket.socket | None = None) -> None:
@@ -146,7 +160,7 @@ class NetworkServer(NetworkCore):
         connected: bool = True
         while connected:
             try:
-                msg_length_str: str = conn.recv(self.HEADER).decode(self.FORMAT).strip()
+                msg_length_str: str = self.recv_all(conn).decode(self.FORMAT).strip()
                 if not msg_length_str:
                     logger.error(
                         f"[Server] client {addr} sent empty bytes. Disconnecting..."
@@ -156,7 +170,7 @@ class NetworkServer(NetworkCore):
 
                 try:
                     msg_length: int = int(msg_length_str)
-                    msg: str = conn.recv(msg_length).decode(self.FORMAT)
+                    msg: str = self.recv_all(conn, msg_length).decode(self.FORMAT)
                 except ValueError as e:
                     logger.warning(f"[Server] couldn't get message length: {e}")
                     # connection is broken here, so we say bye bye
@@ -288,6 +302,7 @@ class NetworkServer(NetworkCore):
 
             if len(self.players) == 0:
                 self.current_game_state = None
+                self.empty_event.set()
                 logger.info("[Server] Server is empty. Changing game state to None")
 
         player.conn.close()
@@ -404,6 +419,13 @@ class NetworkServer(NetworkCore):
         self._broadcast(payload)
         self.current_game_state = GameState.FINISH
         self._change_game_state(self.current_game_state)
+
+    def _wait_and_stop(self) -> None:
+        """
+        Closes the server when empty_event is triggered
+        """
+        self.empty_event.wait()
+        self._stop()
 
     def _start_war(self) -> None:
         with self.players_lock:

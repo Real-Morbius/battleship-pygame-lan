@@ -79,7 +79,7 @@ class NetworkClient(NetworkCore):
     def receive(self) -> None:
         while self.connected:
             try:
-                header: bytes = self.client.recv(self.HEADER)
+                header: bytes = self.recv_all(self.client)
 
                 if not header:
                     logger.info("[Client] Connection closed by the server.")
@@ -89,7 +89,7 @@ class NetworkClient(NetworkCore):
                 msg_length_str: str = header.decode(self.FORMAT).strip()
                 if msg_length_str:
                     msg_len: int = int(msg_length_str)
-                    msg: str = self.client.recv(msg_len).decode(self.FORMAT)
+                    msg: str = self.recv_all(self.client, msg_len).decode(self.FORMAT)
 
                     logger.info("[Client] Got new message!")
                     logger.debug(f"[Client] Message: {msg}")

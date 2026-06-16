@@ -26,3 +26,15 @@ class NetworkCore:
             target_socket.sendall(message)
         except OSError as e:
             logger.error(f"[Network] Error while sending data: {e}")
+
+    def recv_all(self, conn: socket.socket, n: int | None = None) -> bytes:
+        if n is None:
+            n = self.HEADER
+
+        data = bytearray()
+        while len(data) < n:
+            packet = conn.recv(n - len(data))
+            if not packet:
+                return b""
+            data.extend(packet)
+        return bytes(data)
