@@ -160,7 +160,7 @@ class NetworkServer(NetworkCore):
         connected: bool = True
         while connected:
             try:
-                msg_length_str: str = conn.recv(self.HEADER).decode(self.FORMAT).strip()
+                msg_length_str: str = self.recv_all(conn).decode(self.FORMAT).strip()
                 if not msg_length_str:
                     logger.error(
                         f"[Server] client {addr} sent empty bytes. Disconnecting..."
@@ -170,7 +170,7 @@ class NetworkServer(NetworkCore):
 
                 try:
                     msg_length: int = int(msg_length_str)
-                    msg: str = conn.recv(msg_length).decode(self.FORMAT)
+                    msg: str = self.recv_all(conn, msg_length).decode(self.FORMAT)
                 except ValueError as e:
                     logger.warning(f"[Server] couldn't get message length: {e}")
                     # connection is broken here, so we say bye bye
